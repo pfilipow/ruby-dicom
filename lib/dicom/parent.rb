@@ -54,7 +54,7 @@ module DICOM
           # As the element has been moved in place, perform re-encode if indicated:
           element.value = element.value if reencode
         else
-          raise "A Sequence is only allowed to have Item elements added to it. Use add_item() instead if the intention is to add an Item."
+          logger.warn "A Sequence is only allowed to have Item elements added to it. Use add_item() instead if the intention is to add an Item."
         end
       else
         raise ArgumentError, "An Item is not allowed as a parameter to the add() method. Use add_item() instead."
