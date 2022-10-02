@@ -177,7 +177,7 @@ module DICOM
     'GB18030'    => 'GB18030',
     'ISO_IR 192' => 'UTF-8'
   }
-  ENCODING_NAME.default = 'ASCII-8BIT'
+  ENCODING_NAME.default = 'UTF-8'
 
   # The type conversion (method) used for the various value representations.
   VALUE_CONVERSION = {
