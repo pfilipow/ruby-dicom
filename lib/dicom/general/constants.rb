@@ -160,6 +160,7 @@ module DICOM
   # The relationship between DICOM Character Set and Encoding name.
   ENCODING_NAME = {
     'ISO_IR 100' => 'ISO-8859-1',
+    'ISO 2022 IR 100' => 'ISO-8859-1',
     'ISO_IR 101' => 'ISO-8859-2',
     'ISO_IR 109' => 'ISO-8859-3',
     'ISO_IR 110' => 'ISO-8859-4',
