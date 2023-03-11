@@ -47,6 +47,7 @@ module DICOM
       @host_ip = host_ip
       @port = port
       # Optional parameters (and default values):
+      @ssl = options[:ssl]
       @ae =  options[:ae]  || "RUBY_DICOM"
       @host_ae =  options[:host_ae]  || "DEFAULT"
       @max_package_size = options[:max_package_size] || 32768 # 16384
@@ -63,7 +64,7 @@ module DICOM
       # Setup the user information used in the association request::
       set_user_information_array
       # Initialize the network package handler:
-      @link = Link.new(:ae => @ae, :host_ae => @host_ae, :max_package_size => @max_package_size, :timeout => @timeout)
+      @link = Link.new(:ae => @ae, :host_ae => @host_ae, :max_package_size => @max_package_size, :timeout => @timeout, :ssl => @ssl)
     end
 
     # Tests the connection to the server by performing a C-ECHO procedure.

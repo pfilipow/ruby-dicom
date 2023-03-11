@@ -34,6 +34,7 @@ module DICOM
       # Optional parameters (and default values):
       @file_handler = options[:file_handler] || FileHandler
       @ae =  options[:ae]  || "RUBY_DICOM"
+      @ssl = options[:ssl]
       @host_ae =  options[:host_ae]  || "DEFAULT"
       @max_package_size = options[:max_package_size] || 32768 # 16384
       @max_receive_size = @max_package_size
@@ -1115,7 +1116,16 @@ module DICOM
     # * <tt>port</tt> -- Integer. The network port to be used in the network communication.
     #
     def start_session(adress, port)
-      @session = TCPSocket.new(adress, port)
+      client = TCPSocket.new(adress, port)
+      if @ssl
+        context = OpenSSL::SSL::SSLContext.new
+        context.verify_mode = OpenSSL::SSL::VERIFY_NONE
+        @session = OpenSSL::SSL::SSLSocket.new(client, context)
+        @session.sync_close = true
+        @session.connect
+      else
+        @session = client
+      end
     end
 
     # Ends the current session by closing the connection.
@@ -1127,7 +1137,11 @@ module DICOM
     # Sends the outgoing message (encoded binary string) to the remote node.
     #
     def transmit
-      @session.send(@outgoing.string, 0)
+      if @ssl
+        @session.write(@outgoing.string)
+      else
+        @session.send(@outgoing.string, 0)
+      end
     end
 
 
@@ -1464,7 +1478,7 @@ module DICOM
         logger.error("No answer was received within the specified timeout period. Aborting.")
         stop_receiving
       else
-        data = @session.recv(@max_receive_size)
+        data = @ssl ? @session.sysread(@max_receive_size) : @session.recv(@max_receive_size)
       end
       data
     end
