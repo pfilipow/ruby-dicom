@@ -14,6 +14,8 @@ module DICOM
     attr_accessor :presentation_contexts
     # A TCP network session where the DICOM communication is done with a remote host or client.
     attr_reader :session
+    # A hash of paramaters related to the DIMSE command
+    attr_accessor :command_results
 
     # Creates a Link instance, which is used by both DClient and DServer to handle network communication.
     #
@@ -1472,7 +1474,7 @@ module DICOM
     # Returns the binary string data received.
     #
     def receive_transmission_data
-      data = false
+      data = nil
       response = IO.select([@session], nil, nil, @timeout)
       if response.nil?
         logger.error("No answer was received within the specified timeout period. Aborting.")
@@ -1480,6 +1482,12 @@ module DICOM
       else
         data = @ssl ? @session.sysread(@max_receive_size) : @session.recv(@max_receive_size)
       end
+
+      if data&.empty?
+        logger.debug("Client closed connection (empty recv). Aborting.")
+        stop_receiving 
+      end
+
       data
     end
 
