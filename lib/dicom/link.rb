@@ -40,6 +40,8 @@ module DICOM
       @host_ae =  options[:host_ae]  || "DEFAULT"
       @max_package_size = options[:max_package_size] || 32768 # 16384
       @max_receive_size = @max_package_size
+      @uid_root = options[:uid_root]
+      @impl_name = options[:impl_name]
       @timeout = options[:timeout] || 10 # seconds
       @min_length = 10 # minimum number of bytes to expect in an incoming transmission
       # Variables used for monitoring state of transmission:
@@ -1533,8 +1535,8 @@ module DICOM
     def set_user_information_array(info=nil)
       @user_information = [
         [ITEM_MAX_LENGTH, "UL", @max_package_size],
-        [ITEM_IMPLEMENTATION_UID, "STR", UID_ROOT],
-        [ITEM_IMPLEMENTATION_VERSION, "STR", NAME]
+        [ITEM_IMPLEMENTATION_UID, "STR", @uid_root || UID_ROOT],
+        [ITEM_IMPLEMENTATION_VERSION, "STR", @impl_name || NAME]
       ]
       # A bit of a hack to include "asynchronous operations window negotiation" and/or "role negotiation",
       # in cases where this has been included in the association request:
