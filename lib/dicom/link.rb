@@ -457,7 +457,7 @@ module DICOM
       @command_results = Array.new
       file_transfer_syntaxes = Array.new
       files = Array.new
-      # single_file_data = Array.new
+      # single_file_data_ar = Array.new
       single_file_data = Tempfile.new('dimse', binmode: true)
       # single_file_data = File.new('dimse.dcm', 'ab')
       transfer_syntax = nil
@@ -475,14 +475,17 @@ module DICOM
           if info[:valid]
             # Determine if it is command or data:
             if info[:presentation_context_flag] == DATA_MORE_FRAGMENTS
-              single_file_data  << info[:bin]
+              single_file_data.syswrite info[:bin] # must use syswrite to avoid ruby's internal buffer
+              # single_file_data_ar  << info[:bin]
 
             elsif info[:presentation_context_flag] == DATA_LAST_FRAGMENT
-              single_file_data  << info[:bin]
+              single_file_data.syswrite info[:bin]
+              # single_file_data_ar  << info[:bin]
               # Join the recorded data binary strings together to make a DICOM file binary string and put it in our files Array:
               # files << single_file_data.join
               @file_handler.receive_file(single_file_data, transfer_syntax)
               # single_file_data.truncate(0)
+              # single_file_data_ar.clear
               single_file_data = Tempfile.new('dimse', binmode: true)
               
             elsif info[:presentation_context_flag] == COMMAND_LAST_FRAGMENT
