@@ -455,10 +455,10 @@ module DICOM
 
       # Reset command results arrays:
       @command_results = Array.new
-      file_transfer_syntaxes = Array.new
-      files = Array.new
+      # file_transfer_syntaxes = Array.new
+      # files = Array.new
       # single_file_data_ar = Array.new
-      single_file_data = Tempfile.new('dimse', binmode: true)
+      # single_file_data = Tempfile.new('dimse', binmode: true)
       # single_file_data = File.new('dimse.dcm', 'ab')
       transfer_syntax = nil
 
@@ -475,25 +475,36 @@ module DICOM
           if info[:valid]
             # Determine if it is command or data:
             if info[:presentation_context_flag] == DATA_MORE_FRAGMENTS
-              single_file_data.syswrite info[:bin] # must use syswrite to avoid ruby's internal buffer
+              @file_handler.incoming_io.syswrite info[:bin] # must use syswrite to avoid ruby's internal buffer
               # single_file_data_ar  << info[:bin]
 
             elsif info[:presentation_context_flag] == DATA_LAST_FRAGMENT
-              single_file_data.syswrite info[:bin]
+              @file_handler.incoming_io.syswrite info[:bin]
               # single_file_data_ar  << info[:bin]
               # Join the recorded data binary strings together to make a DICOM file binary string and put it in our files Array:
               # files << single_file_data.join
-              @file_handler.receive_file(single_file_data, transfer_syntax)
+              @file_handler.end_receive
               # single_file_data.truncate(0)
               # single_file_data_ar.clear
-              single_file_data = Tempfile.new('dimse', binmode: true)
+              # single_file_data = Tempfile.new('dimse', binmode: true)
               
             elsif info[:presentation_context_flag] == COMMAND_LAST_FRAGMENT
               @command_results << info[:results]
-              @file_handler.command_type = command_results.first['0000,0100']
               @presentation_context_id = info[:presentation_context_id] # Does this actually do anything useful?
               transfer_syntax = @presentation_contexts[info[:presentation_context_id]]
-              file_transfer_syntaxes << transfer_syntax
+              # file_transfer_syntaxes << transfer_syntax
+              # @file_handler.command_type = command_results.first['0000,0100']
+
+              data_set_type = info[:results]['0000,0800']
+              @file_handler.start_receive(
+                transfer_syntax: transfer_syntax,
+                affected_sop_class_uid: info[:results]['0000,0002'],
+                command: info[:results]['0000,0100'],
+                message_id: info[:results]['0000,0110'],
+                priority: info[:results]['0000,0700'],
+                affected_sop_instance_uid: info[:results]['0000,1000'],
+                no_data_present: data_set_type == NO_DATA_SET_PRESENT
+              )
             end
           end
         end
