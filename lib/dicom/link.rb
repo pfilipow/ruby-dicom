@@ -457,8 +457,8 @@ module DICOM
       @command_results = Array.new
       file_transfer_syntaxes = Array.new
       files = Array.new
-      single_file_data = Array.new
-      # single_file_data = Tempfile.new('dimse', binmode: true)
+      # single_file_data = Array.new
+      single_file_data = Tempfile.new('dimse', binmode: true)
       # single_file_data = File.new('dimse.dcm', 'ab')
       transfer_syntax = nil
 
@@ -481,11 +481,13 @@ module DICOM
               single_file_data  << info[:bin]
               # Join the recorded data binary strings together to make a DICOM file binary string and put it in our files Array:
               # files << single_file_data.join
-              @file_handler.receive_file(single_file_data.join, transfer_syntax)
-              single_file_data.clear
-
+              @file_handler.receive_file(single_file_data, transfer_syntax)
+              # single_file_data.truncate(0)
+              single_file_data = Tempfile.new('dimse', binmode: true)
+              
             elsif info[:presentation_context_flag] == COMMAND_LAST_FRAGMENT
               @command_results << info[:results]
+              @file_handler.command_type = command_results.first['0000,0100']
               @presentation_context_id = info[:presentation_context_id] # Does this actually do anything useful?
               transfer_syntax = @presentation_contexts[info[:presentation_context_id]]
               file_transfer_syntaxes << transfer_syntax
