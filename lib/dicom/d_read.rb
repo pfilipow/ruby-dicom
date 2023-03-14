@@ -241,7 +241,7 @@ module DICOM
         begin
           # Extracting Data element information (nil is returned if end of the string is encountered in a normal way).
           data_element = process_data_element
-        rescue Exception => msg
+        rescue StandardError => msg
           # The parse algorithm crashed. Set data_element as false to break
           # the loop and toggle the success boolean to indicate failure.
           @read_success = false
@@ -252,6 +252,7 @@ module DICOM
           logger.debug(msg.backtrace)
           # Explain the failure as an error:
           logger.error("Parsing a Data Element has failed. This is likely caused by an invalid DICOM encoding.")
+          raise msg
         end
       end
     end
