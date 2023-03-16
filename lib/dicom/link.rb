@@ -450,23 +450,11 @@ module DICOM
     # the code somewhat. Probably a better handling of command requests (and their corresponding data fragments) would be a good idea.
     #
     def handle_incoming_data(path)
-      # Wait for incoming data:
-      # segments = receive_multiple_transmissions(file=true)
-
       # Reset command results arrays:
       @command_results = Array.new
-      # file_transfer_syntaxes = Array.new
-      # files = Array.new
-      # single_file_data_ar = Array.new
-      # single_file_data = Tempfile.new('dimse', binmode: true)
-      # single_file_data = File.new('dimse.dcm', 'ab')
       transfer_syntax = nil
 
       @listen = true
-      # segments = Array.new
-      # while @listen
-      #   segments.concat receive_single_transmission(@min_length, true)
-      # end
 
       while @listen
         segments = receive_single_transmission(@min_length, true)
@@ -475,25 +463,16 @@ module DICOM
           if info[:valid]
             # Determine if it is command or data:
             if info[:presentation_context_flag] == DATA_MORE_FRAGMENTS
-              @file_handler.incoming_io.syswrite info[:bin] # must use syswrite to avoid ruby's internal buffer
-              # single_file_data_ar  << info[:bin]
+              @file_handler.receive_data info[:bin]
 
             elsif info[:presentation_context_flag] == DATA_LAST_FRAGMENT
-              @file_handler.incoming_io.syswrite info[:bin]
-              # single_file_data_ar  << info[:bin]
-              # Join the recorded data binary strings together to make a DICOM file binary string and put it in our files Array:
-              # files << single_file_data.join
+              @file_handler.receive_data info[:bin]
               @file_handler.end_receive
-              # single_file_data.truncate(0)
-              # single_file_data_ar.clear
-              # single_file_data = Tempfile.new('dimse', binmode: true)
               
             elsif info[:presentation_context_flag] == COMMAND_LAST_FRAGMENT
               @command_results << info[:results]
               @presentation_context_id = info[:presentation_context_id] # Does this actually do anything useful?
               transfer_syntax = @presentation_contexts[info[:presentation_context_id]]
-              # file_transfer_syntaxes << transfer_syntax
-              # @file_handler.command_type = command_results.first['0000,0100']
 
               data_set_type = info[:results]['0000,0800']
               @file_handler.start_receive(
