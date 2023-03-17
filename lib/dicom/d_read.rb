@@ -169,7 +169,7 @@ module DICOM
         unless @current_parent[tag] and !@overwrite
           @current_element = Element.new(tag, value, :bin => bin, :name => name, :parent => @current_parent, :vr => vr)
           # Check that the data stream didn't end abruptly:
-          raise "The actual length of the value (#{@current_element.bin.length}) does not match its specified length (#{length}) for Data Element #{@current_element.tag}" if length != @current_element.bin.length
+          raise ProcessDataElementError, "The actual length of the value (#{@current_element.bin.length}) does not match its specified length (#{length}) for Data Element #{@current_element.tag}" if length != @current_element.bin.length
         end
       end
       # Return true to indicate success:
