@@ -255,7 +255,6 @@ module DICOM
           logger.debug(msg.backtrace)
           # Explain the failure as an error:
           logger.error("Parsing a Data Element has failed. This is likely caused by an invalid DICOM encoding.")
-          raise msg
         end
       end
     end
