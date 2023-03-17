@@ -441,15 +441,7 @@ module DICOM
     # The incoming traffic will in most cases be: A C-STORE-RQ (command fragment) followed by a bunch of data fragments.
     # However, it may also be a C-ECHO-RQ command fragment, which is used to test connections.
     #
-    # === Parameters
-    #
-    # * <tt>path</tt> -- The path used to save incoming DICOM files.
-    #
-    #--
-    # FIXME: The code which handles incoming data isnt quite satisfactory. It would probably be wise to rewrite it at some stage to clean up
-    # the code somewhat. Probably a better handling of command requests (and their corresponding data fragments) would be a good idea.
-    #
-    def handle_incoming_data(path)
+    def handle_incoming_data
       # Reset command results arrays:
       @command_results = Array.new
       transfer_syntax = nil
