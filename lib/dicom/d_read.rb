@@ -1,6 +1,8 @@
 module DICOM
 
   class Parent
+    class ProcessDataElementError < StandardError
+    end
 
     # Loads data from an encoded DICOM string and creates
     # items and elements which are linked to this instance.
@@ -241,7 +243,8 @@ module DICOM
         begin
           # Extracting Data element information (nil is returned if end of the string is encountered in a normal way).
           data_element = process_data_element
-        rescue StandardError => msg
+        
+        rescue ProcessDataElementError => msg
           # The parse algorithm crashed. Set data_element as false to break
           # the loop and toggle the success boolean to indicate failure.
           @read_success = false
