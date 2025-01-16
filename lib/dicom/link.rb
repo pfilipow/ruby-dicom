@@ -1487,7 +1487,7 @@ module DICOM
         data = @ssl ? @session.sysread(@max_receive_size) : @session.recv(@max_receive_size)
       end
 
-      if data&.empty?
+      if data&.empty? || data.nil?
         logger.debug("Client closed connection (empty recv). Aborting.")
         stop_receiving 
       end
